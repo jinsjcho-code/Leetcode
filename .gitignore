@@ -1,0 +1,11 @@
+# Compiled binaries / local test builds
+*.exe
+*.out
+*.o
+a.out
+sol
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db

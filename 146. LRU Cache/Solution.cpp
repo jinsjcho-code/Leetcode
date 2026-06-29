@@ -1,74 +1,110 @@
 class LRUCache {
+// define linked list and hash table for key is good structure for this.
+   
+// 1) Define the List
+//   Head(dummy) - List#1 - List#2 - List#3 .... - Tail (Dummy)
+// 2) Hash table
+//   Key | List // Hash table
+// 3) function 
+//  - remove
+//  - AddFront
+
 private:
     struct Node {
-        int key, val;
-        Node* prev;
+        int key, value;
         Node* next;
-        Node(int k, int v): key(k), val(v), prev(nullptr), next(nullptr) {}
+        Node* prev;
+        
+        Node (int k, int v): key(k), value(v), next(nullptr), prev(nullptr) {}
+     
     };
+
     Node* head;
     Node* tail;
     int cap=0;
 
     unordered_map<int, Node*> LRU;
 
-    void remove(Node* node) { // helper #1: remove the node
+    void remove(Node* node) { // Goal: disconnect link prev and next;
+        // Head - List#1 - List#2 - List#3 - tail
         node->prev->next = node->next;
         node->next->prev = node->prev;
     }
 
     void addFront(Node* node) {
         node->next = head->next;
-        node->prev = head;
-        node->next->prev = node;
+        head->next->prev = node;
         head->next = node;
+        node->prev = head;
     }
 
-public:
 
+ public:
     LRUCache(int capacity) {
-        head = new Node(0,0);
-        tail = new Node(0,0);
-        head->next = tail;
+        // Define cap to decide evict condition
+        head=new Node(0,0);
+        tail=new Node(0,0);
+        head->next =tail;
         tail->prev = head;
-        cap=capacity;
+        cap = capacity;
     }
     
     int get(int key) {
-        // if key doesn't exist then return -1
-        if (LRU.find(key) == LRU.end()) return -1;
+        // need to check key
+        // if it has the key return value
+        // otherwise, return -1;
 
-        // if key exist, return value;
-        else {
-            Node* node = LRU[key];
-            remove(node);
-            addFront(node);
-            return node->val;
+        // Hash table(LRU) set the LRU based on key
+        // Head - List#1 - List#2 - Tail
+        // Head - List#2 - List#1 - Tail
+
+        // remove -> AddFront
+        if (LRU.find(key) == LRU.end()) {
+            return -1;
         }
+
+        Node* node = LRU[key];
+
+        remove(node);
+        addFront(node);
+
+        return node->value;
     }
     
     void put(int key, int value) {
-        // if key exist then update the value;
-        if (LRU.find(key)!=LRU.end()) {
+        // 1) update the key
+        //   - update the LRU
+        // 2) If it doesn't have the key, add key-value pair
+        //   - update the LRU
+        // 3) check the evict condition and evcit when it has more than cap
+        //   - check the evict condition (cap > hash.size())
+        //   -- if yes, evict near the tail
+        
+
+        if (LRU.find(key)!= LRU.end()) { //  exist key
             Node* node = LRU[key];
-            node->val = value;
-            remove(node);
-            addFront(node);
+            node->value = value;
+            
+            remove(LRU[key]);
+            addFront(LRU[key]);
             return;
         }
 
+        // doesn't exist key
         Node* node = new Node(key, value);
-        addFront(node);
         LRU[key] = node;
+        addFront(LRU[key]);
 
+        //evict
         if (LRU.size() > cap) {
-            Node* current= tail->prev;
-            
-            current->prev->next = tail;
-            tail->prev = current->prev;
-            LRU.erase(current->key);
-            delete current;
+            Node* node = tail->prev;
+
+            remove (node);
+            LRU.erase(node->key);
+            delete node;
         }
+
+        
     }
 };
 

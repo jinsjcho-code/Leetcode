@@ -55,8 +55,6 @@ public:
         if (!node) return true;
 
         // progress
-
-        // if node->val is within range then return true
         if (node->val <= minVal || node->val >= maxVal) return false;
         
         return valid(node->left, minVal, node->val) && valid(node->right, node->val, maxVal);

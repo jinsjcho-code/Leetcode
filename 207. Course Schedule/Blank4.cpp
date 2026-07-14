@@ -51,6 +51,7 @@ public:
             for (int next:adj[cur]) {
                 indegree[next]--;
                 
+                if (indegree[next]==0)
                 q.push(next);
             }
         }
